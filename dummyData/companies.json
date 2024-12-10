@@ -1,0 +1,181 @@
+{
+    "companies": [
+      {
+        "companyName": "Investment Solutions Inc.",
+        "accountId": "001",
+        "subscriptionDetails": {
+          "planName": "Premium",
+          "features": ["Unlimited Number Tracking", "Advanced Analytics", "API Access"],
+          "rentedNumbers": [
+            {
+              "number": "+1234567890",
+              "status": "Active",
+              "groupsMonitored": ["Investment Opportunities", "Crypto Trading Experts"],
+              "scamsPrevented": 15,
+              "lastActiveDate": "2023-12-01"
+            },
+            {
+              "number": "+1234567891",
+              "status": "Paused",
+              "groupsMonitored": ["Global Investment Forum"],
+              "scamsPrevented": 5,
+              "lastActiveDate": "2023-11-20"
+            }
+          ]
+        }
+      },
+      {
+        "companyName": "Global Investments Ltd.",
+        "accountId": "002",
+        "subscriptionDetails": {
+          "planName": "Standard",
+          "features": ["Number Tracking - up to 10 numbers", "Basic Analytics"],
+          "rentedNumbers": [
+            {
+              "number": "+0987654321",
+              "status": "Active",
+              "groupsMonitored": ["Emerging Markets"],
+              "scamsPrevented": 8,
+              "lastActiveDate": "2023-11-30"
+            }
+          ]
+        }
+      },
+      {
+        "companyName": "Crypto Ventures LLC",
+        "accountId": "003",
+        "subscriptionDetails": {
+          "planName": "Basic",
+          "features": ["Number Tracking - up to 5 numbers"],
+          "rentedNumbers": [
+            {
+              "number": "+1122334455",
+              "status": "Active",
+              "groupsMonitored": ["Crypto Pioneers"],
+              "scamsPrevented": 20,
+              "lastActiveDate": "2023-12-02"
+            }
+          ]
+        }
+      },
+      {
+        "companyName": "Equity Partners Corp.",
+        "accountId": "004",
+        "subscriptionDetails": {
+          "planName": "Enterprise",
+          "features": ["Unlimited Number Tracking", "Advanced Analytics", "Dedicated Support", "Custom Features"],
+          "rentedNumbers": [
+            {
+              "number": "+1223344556",
+              "status": "Active",
+              "groupsMonitored": ["Equity Insights", "Venture Capitalists"],
+              "scamsPrevented": 12,
+              "lastActiveDate": "2023-11-25"
+            }
+          ]
+        }
+      },
+      {
+        "companyName": "Fintech Innovators Ltd.",
+        "accountId": "005",
+        "subscriptionDetails": {
+          "planName": "Premium",
+          "features": ["Unlimited Number Tracking", "Advanced Analytics"],
+          "rentedNumbers": [
+            {
+              "number": "+1333444555",
+              "status": "Active",
+              "groupsMonitored": ["Tech Investment Group"],
+              "scamsPrevented": 9,
+              "lastActiveDate": "2023-11-22"
+            }
+          ]
+        }
+      },
+      {
+        "companyName": "Sustainable Investments Inc.",
+        "accountId": "006",
+        "subscriptionDetails": {
+          "planName": "Standard",
+          "features": ["Number Tracking - up to 10 numbers", "Basic Analytics"],
+          "rentedNumbers": [
+            {
+              "number": "+1444555666",
+              "status": "Active",
+              "groupsMonitored": ["Green Energy Investments"],
+              "scamsPrevented": 7,
+              "lastActiveDate": "2023-11-18"
+            }
+          ]
+        }
+      },
+      {
+        "companyName": "Market Analysts LLC",
+        "accountId": "007",
+        "subscriptionDetails": {
+          "planName": "Basic",
+          "features": ["Number Tracking - up to 5 numbers"],
+          "rentedNumbers": [
+            {
+              "number": "+1555666777",
+              "status": "Active",
+              "groupsMonitored": ["Market Trends"],
+              "scamsPrevented": 11,
+              "lastActiveDate": "2023-11-15"
+            }
+          ]
+        }
+      },
+      {
+        "companyName": "Global Crypto Traders",
+        "accountId": "008",
+        "subscriptionDetails": {
+          "planName": "Premium",
+          "features": ["Unlimited Number Tracking", "Advanced Analytics", "API Access"],
+          "rentedNumbers": [
+            {
+              "number": "+1666777888",
+              "status": "Active",
+              "groupsMonitored": ["Crypto Market Watch"],
+              "scamsPrevented": 18,
+              "lastActiveDate": "2023-11-10"
+            }
+          ]
+        }
+      },
+      {
+        "companyName": "Investment Education Services",
+        "accountId": "009",
+        "subscriptionDetails": {
+          "planName": "Standard",
+          "features": ["Number Tracking - up to 10 numbers", "Basic Analytics"],
+          "rentedNumbers": [
+            {
+              "number": "+1777888999",
+              "status": "Active",
+              "groupsMonitored": ["Investment Learning Hub"],
+              "scamsPrevented": 4,
+              "lastActiveDate": "2023-11-05"
+            }
+          ]
+        }
+      },
+      {
+        "companyName": "High Yield Investment Corp.",
+        "accountId": "010",
+        "subscriptionDetails": {
+          "planName": "Enterprise",
+          "features": ["Unlimited Number Tracking", "Advanced Analytics", "Dedicated Support", "Custom Features"],
+          "rentedNumbers": [
+            {
+              "number": "+1888999000",
+              "status": "Active",
+              "groupsMonitored": ["High Stakes Investments"],
+              "scamsPrevented": 22,
+              "lastActiveDate": "2023-11-01"
+            }
+          ]
+        }
+      }
+    ]
+  }

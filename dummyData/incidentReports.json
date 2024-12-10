@@ -1,0 +1,94 @@
+{
+    "incidentReports": [
+      {
+        "id": 1,
+        "scamType": "Phishing",
+        "affectedNumber": "+1234567890",
+        "dateTime": "2023-12-01T14:30:00Z",
+        "description": "Attempt to solicit personal information through a fake investment offer.",
+        "actionTaken": "Alert sent, number reported to authorities",
+        "status": "Resolved"
+      },
+      {
+        "id": 2,
+        "scamType": "Ponzi Scheme",
+        "affectedNumber": "+0987654321",
+        "dateTime": "2023-12-02T16:45:00Z",
+        "description": "Promotion of a non-existent investment opportunity promising high returns.",
+        "actionTaken": "Alert sent, user educated",
+        "status": "Monitoring"
+      },
+      {
+        "id": 3,
+        "scamType": "Impersonation",
+        "affectedNumber": "+1122334455",
+        "dateTime": "2023-12-03T09:20:00Z",
+        "description": "Scammer impersonating a legitimate investment firm to gain trust.",
+        "actionTaken": "Alert sent, scam pattern recorded",
+        "status": "Resolved"
+      },
+      {
+        "id": 4,
+        "scamType": "Advance Fee Fraud",
+        "affectedNumber": "+1223344556",
+        "dateTime": "2023-12-04T11:00:00Z",
+        "description": "Request for upfront payment to access an investment that does not exist.",
+        "actionTaken": "Alert sent, number blocked",
+        "status": "Resolved"
+      },
+      {
+        "id": 5,
+        "scamType": "Fake Broker",
+        "affectedNumber": "+1333444555",
+        "dateTime": "2023-12-05T13:15:00Z",
+        "description": "Fake broker offering unrealistic trading benefits.",
+        "actionTaken": "Alert sent, follow-up required",
+        "status": "Unresolved"
+      },
+      {
+        "id": 6,
+        "scamType": "Malware Link",
+        "affectedNumber": "+1444555666",
+        "dateTime": "2023-12-06T17:30:00Z",
+        "description": "Link to malware under guise of investment software.",
+        "actionTaken": "Alert sent, number quarantined",
+        "status": "Resolved"
+      },
+      {
+        "id": 7,
+        "scamType": "High Yield Investment Fraud",
+        "affectedNumber": "+1555666777",
+        "dateTime": "2023-12-07T10:50:00Z",
+        "description": "Offering fictitious high-yield investments.",
+        "actionTaken": "Alert sent, educational material provided",
+        "status": "Monitoring"
+      },
+      {
+        "id": 8,
+        "scamType": "Binary Options Scam",
+        "affectedNumber": "+1666777888",
+        "dateTime": "2023-12-08T12:00:00Z",
+        "description": "Binary options scam with rigged setup to cause losses.",
+        "actionTaken": "Alert sent, scam pattern updated",
+        "status": "Resolved"
+      },
+      {
+        "id": 9,
+        "scamType": "Investment Seminar Scam",
+        "affectedNumber": "+1777888999",
+        "dateTime": "2023-12-09T14:20:00Z",
+        "description": "Scam involving paid seminars that offer no real value.",
+        "actionTaken": "Alert sent, public warning issued",
+        "status": "Resolved"
+      },
+      {
+        "id": 10,
+        "scamType": "Pyramid Scheme",
+        "affectedNumber": "+1888999000",
+        "dateTime": "2023-12-10T15:35:00Z",
+        "description": "Pyramid scheme disguised as a legitimate multi-level marketing opportunity.",
+        "actionTaken": "Alert sent, involved accounts investigated",
+        "status": "Monitoring"
+      }
+    ]
+  }

@@ -1,0 +1,14 @@
+{
+    "subscriptionPlans": [
+      {
+        "planName": "Per Number Plan",
+        "features": [
+          "Real-time Alerts",
+          "Number Tracking",
+          "Basic Analytics"
+        ],
+        "pricePerNumberPerMonth": 30,
+        "description": "Flexible plan where you pay RM30 per number per month. Ideal for businesses of any size that require scalable and cost-effective solutions for monitoring and preventing scams."
+      }
+    ]
+  }
