@@ -1,0 +1,78 @@
+import { Api, TelegramClient } from "telegram";
+import { StringSession } from "telegram/sessions/index.js";
+import input from "input";
+
+const apiId = 23478497;
+const apiHash = "bdbb1f90107e38a0715c0e8077db3bb5";
+const stringSession = new StringSession("1BQANOTEuMTA4LjU2LjEzMgG7TXRjpy/4+8V1hh/lz+/X5wsj/XDvD6/EMl8mDPI6yDJu39sez813jbJpXWiusOxnvJxaJDEdgroHw5s8/JLZlepByhfYfjR9kFOIo65GnNtzdAIeiRaST0xqX//O1Qj/QUyoDPxCT/j6ikJFoECpkWjKL8E73TGgQeBqFP72bKTTdmlOrK3GFzGcqWm5eJog+R/HmqJHlSsqNDw18t7lFt/ifKcTrndT2eCghA3tUP+9CVQDdGdCujekbKtOXPCqgFd8hHH6gCWDhjcW4vI1+d31I/pHTPJfE90NJZHH1jaDSNydutaWCODxk0th2yL3Q2S14x49xBjRUnHfFTfs5w==");
+
+(async () => {
+  console.log("Loading interactive example...");
+  const client = new TelegramClient(stringSession, apiId, apiHash, {
+    connectionRetries: 5,
+  });
+  await client.connect();
+
+  try {
+    const result = await client.invoke(
+      new Api.messages.GetHistory({
+        peer: -4786097455,
+        limit: 100,  // Increased to maximum allowed per request
+        offsetId: 0,
+        offsetDate: 0,
+        addOffset: 0,
+        maxId: 0,
+        minId: 0,
+        hash: 0
+      })
+    );
+    
+    // If there are more messages than the limit
+    if (result.count > result.messages.length) {
+      let allMessages = [...result.messages];
+      let lastId = result.messages[result.messages.length - 1].id;
+
+      // Keep fetching until we get all messages
+      while (allMessages.length < result.count) {
+        const moreMessages = await client.invoke(
+          new Api.messages.GetHistory({
+            peer: -4786097455,
+            limit: 100,
+            offsetId: lastId,
+            offsetDate: 0,
+            addOffset: 0,
+            maxId: 0,
+            minId: 0,
+            hash: 0
+          })
+        );
+
+        if (moreMessages.messages.length === 0) break;
+        
+        allMessages = [...allMessages, ...moreMessages.messages];
+        lastId = moreMessages.messages[moreMessages.messages.length - 1].id;
+      }
+
+      // Print all messages
+      allMessages.forEach(msg => {
+        if (msg.message) {  // Only print if there's a message
+          const date = new Date(msg.date * 1000).toLocaleString();
+          console.log(`[${date}] ${msg.message}`);
+        }
+      });
+    } else {
+      // Print messages if we got everything in first request
+      result.messages.forEach(msg => {
+        if (msg.message) {
+          const date = new Date(msg.date * 1000).toLocaleString();
+          console.log(`[${date}] ${msg.message}`);
+        }
+      });
+    }
+
+  } catch (err) {
+    console.error("Error:", err);
+  } finally {
+    await client.disconnect();
+  }
+})();
