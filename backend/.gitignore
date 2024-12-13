@@ -1,3 +1,5 @@
 node_modules
 session.json
 .env
+chatHistory.json
+dialogs.json
