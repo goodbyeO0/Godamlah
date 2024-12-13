@@ -1,0 +1,64 @@
+{
+    "scammers": [
+      {
+        "contactNumber": "+1234567890",
+        "scamTypes": ["Phishing", "Impersonation"],
+        "reportedIncidents": 5,
+        "status": "Under Investigation"
+      },
+      {
+        "contactNumber": "+0987654321",
+        "scamTypes": ["Ponzi Scheme"],
+        "reportedIncidents": 3,
+        "status": "Blacklisted"
+      },
+      {
+        "contactNumber": "+1122334455",
+        "scamTypes": ["Advance Fee Fraud", "Fake Broker"],
+        "reportedIncidents": 7,
+        "status": "Active Monitoring"
+      },
+      {
+        "contactNumber": "+1223344556",
+        "scamTypes": ["Malware Link"],
+        "reportedIncidents": 2,
+        "status": "Resolved"
+      },
+      {
+        "contactNumber": "+1333444555",
+        "scamTypes": ["High Yield Investment Fraud", "Binary Options Scam"],
+        "reportedIncidents": 4,
+        "status": "Under Investigation"
+      },
+      {
+        "contactNumber": "+1444555666",
+        "scamTypes": ["Investment Seminar Scam"],
+        "reportedIncidents": 1,
+        "status": "Blacklisted"
+      },
+      {
+        "contactNumber": "+1555666777",
+        "scamTypes": ["Pyramid Scheme"],
+        "reportedIncidents": 6,
+        "status": "Active Monitoring"
+      },
+      {
+        "contactNumber": "+1666777888",
+        "scamTypes": ["Phishing"],
+        "reportedIncidents": 8,
+        "status": "Resolved"
+      },
+      {
+        "contactNumber": "+1777888999",
+        "scamTypes": ["Impersonation", "Advance Fee Fraud"],
+        "reportedIncidents": 9,
+        "status": "Under Investigation"
+      },
+      {
+        "contactNumber": "+1888999000",
+        "scamTypes": ["Fake Broker", "Ponzi Scheme"],
+        "reportedIncidents": 10,
+        "status": "Active Monitoring"
+      }
+    ]
+  }
