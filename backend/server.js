@@ -1,11 +1,12 @@
 const express = require("express");
 const fs = require("fs");
-const { TelegramClient } = require("telegram");
+const { TelegramClient, Api } = require("telegram");
 const { StringSession } = require("telegram/sessions");
+const { NewMessage } = require("telegram/events");
 const input = require("input");
 require("dotenv").config();
 
-const apiId = process.env.API_ID;
+const apiId = Number(process.env.API_ID);
 const apiHash = process.env.API_HASH;
 const sessionFilePath = process.env.SESSION_FILE_PATH;
 const PORT = process.env.PORT || 3000;
@@ -23,32 +24,36 @@ const app = express();
 
 app.use(express.json());
 
-app.post("/send-message", async (req, res) => {
-  const { message } = req.body;
+const client = new TelegramClient(stringSession, apiId, apiHash, {
+  connectionRetries: 10,
+});
 
-  try {
-    const client = new TelegramClient(stringSession, apiId, apiHash, {
-      connectionRetries: 10,
-    });
+// Start the client and listen for incoming messages
+client.start({
+  phoneNumber: async () => await input.text("Please enter your number: "),
+  password: async () => await input.text("Please enter your password: "),
+  phoneCode: async () => await input.text("Please enter the code you received: "),
+  onError: (err) => console.log(err),
+}).then(() => {
+  console.log("Client started. Listening for incoming messages...");
 
-    // Start the client and handle login
-    await client.start({
-      phoneNumber: async () => await input.text("Please enter your number: "),
-      password: async () => await input.text("Please enter your password: "),
-      phoneCode: async () => await input.text("Please enter the code you received: "),
-      onError: (err) => console.log(err),
-    });
+  // Add event handler for new messages
+  client.addEventHandler(async (event) => {
+    const message = event.message;
 
-    // Save the session string to a file
-    fs.writeFileSync(sessionFilePath, client.session.save());
+    if (message) {
+      console.log("New message received:", message.text);
 
-    await client.sendMessage("me", { message });
-    console.log("Message sent successfully.");
-    res.status(200).send("Message sent successfully.");
-  } catch (error) {
-    console.error("Failed to send message:", error);
-    res.status(500).send("Failed to send message.");
-  }
+      // Log message details to console
+      console.log({
+        senderId: message.senderId,
+        chatId: message.peerId,
+        // text: message.text,
+      });
+    }
+  }, new NewMessage({})); // Listen for new messages
+}).catch(error => {
+  console.error("Failed to start client:", error);
 });
 
 app.listen(PORT, () => {
