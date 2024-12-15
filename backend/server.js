@@ -138,7 +138,7 @@ async function fetchDialogsAndChatHistory(client) {
 }
 
 // Endpoint to fetch dialogs and chat history
-app.get("/fetch-dialogs-and-chat-history", async (req, res) => {
+app.get("/fetch-chat", async (req, res) => {
   try {
     const { dialogList, chatHistories } = await fetchDialogsAndChatHistory(client);
     res.status(200).json({ dialogs: dialogList, chatHistories });
@@ -148,7 +148,7 @@ app.get("/fetch-dialogs-and-chat-history", async (req, res) => {
 });
 
 // New endpoint for the bot to fetch chat history JSON data
-app.get("/fetch-chat-history-for-bot", (req, res) => {
+app.get("/fetch-bot", (req, res) => {
   try {
     const chatHistories = JSON.parse(fs.readFileSync("chatHistories.json", "utf-8"));
     res.status(200).json(chatHistories);
