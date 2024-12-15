@@ -95,13 +95,35 @@ async function fetchDialogsAndChatHistory(client) {
         })
       );
 
+      const messages = await Promise.all(result.messages.map(async (msg) => {
+        const messageData = {
+          id: msg.id,
+          date: msg.date,
+          message: msg.message,
+        };
+
+        if (msg.media) {
+          console.log(`Processing media from message ${msg.id}...`);
+          try {
+            if (msg.media.photo || msg.media.document) {
+              const buffer = await client.downloadMedia(msg.media);
+              const base64Image = buffer.toString('base64');
+              messageData.media = {
+                type: msg.media.className,
+                base64: base64Image
+              };
+            }
+          } catch (err) {
+            console.error(`Failed to process media from message ${msg.id}:`, err.message);
+          }
+        }
+
+        return messageData;
+      }));
+
       chatHistories.push({
         dialogId: dialog.id,
-        history: result.messages.map(message => ({
-          id: message.id,
-          date: message.date,
-          message: message.message,
-        })),
+        history: messages,
       });
     }
 
