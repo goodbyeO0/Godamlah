@@ -55,8 +55,8 @@ client.start({
     console.error("Failed to start client:", error);
   });
 
-  // New endpoint to get available chats (dialogs)
-app.get("/get-dialogs", async (req, res) => {
+// Function to fetch dialogs and chat history
+async function fetchDialogsAndChatHistory(client) {
   try {
     const dialogs = await client.getDialogs();
     console.log("Available chats:");
@@ -76,22 +76,9 @@ app.get("/get-dialogs", async (req, res) => {
     // Write the dialogs to a JSON file
     fs.writeFileSync('dialogs.json', JSON.stringify(dialogList, null, 2), 'utf-8');
 
-    // Return the dialogs as a JSON response
-    res.status(200).json(dialogList);
-
-  } catch (error) {
-    console.error("Failed to fetch dialogs:", error);
-    res.status(500).send("Failed to fetch dialogs.");
-  }
-});
-
-// New endpoint to fetch chat history and store it in another JSON file
-app.get("/fetch-chat-history", async (req, res) => {
-  try {
-    const dialogs = JSON.parse(fs.readFileSync("dialogs.json", "utf-8")).slice(0, 50);
     const chatHistories = [];
 
-    for (const dialog of dialogs) {
+    for (const dialog of dialogList) {
       // Skip fetching history if the dialog is a bot or a wallet
       if (dialog.title.toLowerCase().includes("bot") || dialog.title.toLowerCase().includes("wallet")) {
         console.log(`Skipping bot or wallet dialog: ${dialog.title}`);
@@ -105,29 +92,47 @@ app.get("/fetch-chat-history", async (req, res) => {
           offsetId: 0,
           offsetDate: 0,
           addOffset: 0,
-          maxId: 0,
-          minId: 0,
-          hash: 0
         })
       );
 
       chatHistories.push({
-        chatId: dialog.id,
-        title: dialog.title,
-        messages: result.messages.map(msg => ({
-          id: msg.id,
-          fromId: msg.fromId,
-          message: msg.message,
-          date: msg.date,
+        dialogId: dialog.id,
+        history: result.messages.map(message => ({
+          id: message.id,
+          date: message.date,
+          message: message.message,
         })),
       });
     }
 
-    fs.writeFileSync("chatHistories.json", JSON.stringify(chatHistories, null, 2), "utf-8");
-    res.status(200).send("Chat histories fetched and stored successfully.");
+    // Write the chat histories to a JSON file
+    fs.writeFileSync('chatHistories.json', JSON.stringify(chatHistories, null, 2), 'utf-8');
+
+    return { dialogList, chatHistories };
   } catch (error) {
-    console.error("Failed to fetch chat histories:", error);
-    res.status(500).send("Failed to fetch chat histories.");
+    console.error("Failed to fetch dialogs and chat history:", error);
+    throw new Error("Failed to fetch dialogs and chat history.");
+  }
+}
+
+// Endpoint to fetch dialogs and chat history
+app.get("/fetch-dialogs-and-chat-history", async (req, res) => {
+  try {
+    const { dialogList, chatHistories } = await fetchDialogsAndChatHistory(client);
+    res.status(200).json({ dialogs: dialogList, chatHistories });
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
+// New endpoint for the bot to fetch chat history JSON data
+app.get("/fetch-chat-history-for-bot", (req, res) => {
+  try {
+    const chatHistories = JSON.parse(fs.readFileSync("chatHistories.json", "utf-8"));
+    res.status(200).json(chatHistories);
+  } catch (error) {
+    console.error("Failed to fetch chat history for bot:", error);
+    res.status(500).send("Failed to fetch chat history for bot.");
   }
 });
 
