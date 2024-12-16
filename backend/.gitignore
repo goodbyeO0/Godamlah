@@ -3,3 +3,5 @@ session.json
 .env
 chatHistory.json
 dialogs.json
+latest_chat.json
+downloads

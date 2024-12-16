@@ -55,106 +55,94 @@ client.start({
     console.error("Failed to start client:", error);
   });
 
-// Function to fetch dialogs and chat history
-async function fetchDialogsAndChatHistory(client) {
-  try {
-    const dialogs = await client.getDialogs();
-    console.log("Available chats:");
+let cachedData = null;
+let lastFetchTime = null;
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
-    // Prepare the dialogs for JSON response
+const MESSAGE_LIMIT = 10; // Fetch only last 10 messages
+const DIALOG_LIMIT = 5;   // Fetch only last 5 chats
+
+async function fetchLatestChats(client, force = false) {
+  // Check cache
+  const now = Date.now();
+  if (!force && cachedData && lastFetchTime && (now - lastFetchTime < CACHE_DURATION)) {
+    console.log('Returning cached data');
+    return cachedData;
+  }
+
+  try {
+    console.log('Fetching fresh data...');
+    // Get only limited number of recent dialogs
+    const dialogs = await client.getDialogs({
+      limit: DIALOG_LIMIT
+    });
+
+    // Prepare limited dialogs list
     const dialogList = dialogs.map((dialog, index) => ({
       index: index + 1,
       title: dialog.title || dialog.username || "No Title",
       id: dialog.id,
     }));
 
-    // Log the dialogs to the console
-    dialogList.forEach(dialog => {
-      console.log(`${dialog.index}. Title: ${dialog.title} (ID: ${dialog.id})`);
-    });
-
-    // Write the dialogs to a JSON file
-    fs.writeFileSync('dialogs.json', JSON.stringify(dialogList, null, 2), 'utf-8');
-
     const chatHistories = [];
 
     for (const dialog of dialogList) {
-      // Skip fetching history if the dialog is a bot or a wallet
       if (dialog.title.toLowerCase().includes("bot") || dialog.title.toLowerCase().includes("wallet")) {
-        console.log(`Skipping bot or wallet dialog: ${dialog.title}`);
         continue;
       }
 
+      // Get only limited number of messages per chat
       const result = await client.invoke(
         new Api.messages.GetHistory({
           peer: dialog.id,
-          limit: 100,
+          limit: MESSAGE_LIMIT,
           offsetId: 0,
           offsetDate: 0,
           addOffset: 0,
         })
       );
 
-      const messages = await Promise.all(result.messages.map(async (msg) => {
-        const messageData = {
-          id: msg.id,
-          date: msg.date,
-          message: msg.message,
-        };
-
-        if (msg.media) {
-          console.log(`Processing media from message ${msg.id}...`);
-          try {
-            if (msg.media.photo || msg.media.document) {
-              const buffer = await client.downloadMedia(msg.media);
-              const base64Image = buffer.toString('base64');
-              messageData.media = {
-                type: msg.media.className,
-                base64: base64Image
-              };
-            }
-          } catch (err) {
-            console.error(`Failed to process media from message ${msg.id}:`, err.message);
-          }
-        }
-
-        return messageData;
-      }));
+      const messages = await Promise.all(result.messages.map(async (msg) => ({
+        id: msg.id,
+        date: msg.date,
+        message: msg.message,
+        media: msg.media ? {
+          type: msg.media.className
+        } : null
+      })));
 
       chatHistories.push({
         dialogId: dialog.id,
+        title: dialog.title,
         history: messages,
       });
     }
 
-    // Write the chat histories to a JSON file
-    fs.writeFileSync('chatHistories.json', JSON.stringify(chatHistories, null, 2), 'utf-8');
+    // Update cache
+    cachedData = { dialogList, chatHistories };
+    lastFetchTime = now;
 
-    return { dialogList, chatHistories };
+    // Save to files
+    fs.writeFileSync('latest_chats.json', JSON.stringify(cachedData, null, 2), 'utf-8');
+
+    return cachedData;
   } catch (error) {
-    console.error("Failed to fetch dialogs and chat history:", error);
-    throw new Error("Failed to fetch dialogs and chat history.");
+    console.error("Failed to fetch data:", error);
+    throw new Error("Failed to fetch latest chats");
   }
 }
 
-// Endpoint to fetch dialogs and chat history
-app.get("/fetch-chat", async (req, res) => {
+// Update endpoint to use new function
+app.get("/fetch", async (req, res) => {
   try {
-    const { dialogList, chatHistories } = await fetchDialogsAndChatHistory(client);
-    res.status(200).json({ dialogs: dialogList, chatHistories });
+    const force = req.query.force === 'true';
+    const data = await fetchLatestChats(client, force);
+    res.status(200).json(data);
   } catch (error) {
-    res.status(500).send(error.message);
-  }
-});
-
-// New endpoint for the bot to fetch chat history JSON data
-app.get("/fetch-bot", (req, res) => {
-  try {
-    const chatHistories = JSON.parse(fs.readFileSync("chatHistories.json", "utf-8"));
-    res.status(200).json(chatHistories);
-  } catch (error) {
-    console.error("Failed to fetch chat history for bot:", error);
-    res.status(500).send("Failed to fetch chat history for bot.");
+    res.status(500).json({
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
   }
 });
 
