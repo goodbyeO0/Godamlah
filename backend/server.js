@@ -46,8 +46,8 @@ async function login() {
     await client.sendMessage("me", { message: "Hello!" });
     console.log("Test message sent successfully");
 
-    // Setup event handlers
-    await setupEventHandlers();
+    // can test functions here
+    console.log(await beingAddedToNewGroup());
     console.log("Setup complete");
   } catch (error) {
     console.error("Error during initialization:", error);
@@ -158,21 +158,51 @@ const fetchChatHistory = async (GroupUsername) => {
   }
 };
 
-const setupEventHandlers = async () => {
+const beingAddedToNewGroup = async () => {
+  let status = null;
   try {
     // Listen to ALL updates
-    client.addEventHandler((update) => {
-      if (update) {
-        // Add null check
+    client.addEventHandler(async (update) => {
+      if (update.className === "UpdateChannel") {
+        const groupName = await getGroupName(update.channelId.value);
+        status =
+          groupName === "Not a member"
+            ? "Left/Kicked from group"
+            : "Added to group";
+
         console.log("New update:", {
-          type: update.className || update.constructor.name, // Use className or constructor.name
-          update: update,
+          type: update.className,
+          status: status,
+          groupName: groupName,
+          channelId: update.channelId.value,
         });
       }
     });
-
     console.log("Event handler setup complete");
+    return status;
   } catch (error) {
     console.error("Error setting up event handlers:", error);
+  }
+};
+
+// get group name from id
+const getGroupName = async (groupId) => {
+  try {
+    // Get the chat/channel information
+    const entity = await client.getEntity(groupId);
+
+    // The title property contains the group/channel name
+    if (entity.title) {
+      console.log(`Group Name: ${entity.title}`);
+      return entity.title;
+    } else {
+      return "Unknown Group";
+    }
+  } catch (error) {
+    if (error.errorMessage === "CHANNEL_PRIVATE") {
+      return "Not a member";
+    } else {
+      return "Error getting group name";
+    }
   }
 };
