@@ -59,7 +59,7 @@ let cachedData = null;
 let lastFetchTime = null;
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
-const MESSAGE_LIMIT = 10; // Fetch only last 10 messages
+const MESSAGE_LIMIT = 30; // Fetch only last 10 messages
 const DIALOG_LIMIT = 5;   // Fetch only last 5 chats
 
 async function fetchLatestChats(client, force = false) {
@@ -102,19 +102,46 @@ async function fetchLatestChats(client, force = false) {
         })
       );
 
-      const messages = await Promise.all(result.messages.map(async (msg) => ({
-        id: msg.id,
-        date: msg.date,
-        message: msg.message,
-        media: msg.media ? {
-          type: msg.media.className
-        } : null
-      })));
+      const messages = await Promise.all(result.messages.map(async (msg) => {
+        // Get sender information
+        const sender = msg.fromId ? await client.getEntity(msg.fromId) : null;
+        
+        const messageData = {
+          id: msg.id,
+          date: msg.date,
+          message: msg.message,
+          sender: sender ? {
+            id: sender.id.toString(),
+            username: sender.username || null,
+            firstName: sender.firstName || null,
+            lastName: sender.lastName || null,
+            phone: sender.phone || null
+          } : null
+        };
+
+        // Handle media content
+        if (msg.media) {
+          console.log(`Processing media from message ${msg.id}...`);
+          try {
+            if (msg.media.photo || msg.media.document) {
+              const buffer = await client.downloadMedia(msg.media);
+              const base64Image = buffer.toString('base64');
+              messageData.media = {
+                type: msg.media.className,
+                base64: base64Image
+              };
+            }
+          } catch (err) {
+            console.error(`Failed to process media from message ${msg.id}:`, err.message);
+          }
+        }
+
+        return messageData;
+      }));
 
       chatHistories.push({
         dialogId: dialog.id,
-        title: dialog.title,
-        history: messages,
+        history: messages
       });
     }
 
