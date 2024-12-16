@@ -1,0 +1,20 @@
+$ node server.js 
+Server is running on http://localhost:3000
+[2024-12-17T01:16:40.507] [INFO] - [Running gramJS version 2.26.7]
+[2024-12-17T01:16:40.511] [INFO] - [Connecting to 91.108.56.109:80/TCPFull...]
+[2024-12-17T01:16:40.532] [INFO] - [Connection to 91.108.56.109:80/TCPFull complete!]
+[2024-12-17T01:16:40.533] [INFO] - [Using LAYER 193 for initial connect]
+Connected with existing session
+Test message sent successfully
+Event handler setup complete
+null
+Setup complete
+New update: {
+  type: 'UpdateChannel',
+  status: 'Left/Kicked from group',
+  groupName: 'Not a member',
+  channelId: 2303087293n
+}
+Failed to fetch chat histories: Error: Group "Not a member" not found
+    at fetchChatHistory (D:\idea-hacks\Godamlah\ai\backend\server.js:96:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)

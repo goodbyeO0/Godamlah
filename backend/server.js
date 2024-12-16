@@ -1,10 +1,11 @@
 const express = require("express");
 const fs = require("fs");
-const { TelegramClient } = require("telegram");
+const { TelegramClient, Api } = require("telegram");
 const { StringSession } = require("telegram/sessions");
 const { NewMessage } = require("telegram/events");
 const input = require("input");
 require("dotenv").config();
+const path = require("path");
 
 const app = express();
 app.use(express.json());
@@ -46,9 +47,10 @@ async function login() {
     await client.sendMessage("me", { message: "Hello!" });
     console.log("Test message sent successfully");
 
-    // can test functions here
-    console.log(await beingAddedToNewGroup());
     console.log("Setup complete");
+    //* can test functions here
+    console.log(await beingAddedToNewGroup());
+    // await sendMessageToUser("@goodbye000000", "watashi sigman");
   } catch (error) {
     console.error("Error during initialization:", error);
   }
@@ -99,7 +101,7 @@ const fetchChatHistory = async (GroupUsername) => {
     const result = await client.invoke(
       new Api.messages.GetHistory({
         peer: groupId,
-        limit: 100,
+        limit: 50,
         offsetId: 0,
         offsetDate: 0,
         addOffset: 0,
@@ -109,50 +111,93 @@ const fetchChatHistory = async (GroupUsername) => {
       })
     );
 
+    // Process messages with detailed information
+    const messages = await Promise.all(
+      result.messages.map(async (msg) => {
+        // Get sender information
+        const sender = msg.fromId ? await client.getEntity(msg.fromId) : null;
+
+        const messageData = {
+          id: msg.id,
+          date: new Date(msg.date * 1000).toLocaleString("en-US", {
+            timeZone: "Asia/Kuala_Lumpur",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
+          }),
+          message: msg.message || null,
+          sender: sender
+            ? {
+                id: sender.id.toString(),
+                username: sender.username || null,
+                firstName: sender.firstName || null,
+                lastName: sender.lastName || null,
+                phone: sender.phone || null,
+              }
+            : null,
+        };
+
+        // Handle media content
+        if (msg.media) {
+          console.log(`Processing media from message ${msg.id}...`);
+          try {
+            if (msg.media.photo || msg.media.document) {
+              const buffer = await client.downloadMedia(msg.media);
+              const base64Image = buffer.toString("base64");
+              messageData.media = {
+                type: msg.media.className,
+                base64: base64Image,
+              };
+            }
+          } catch (err) {
+            console.error(
+              `Failed to process media from message ${msg.id}:`,
+              err.message
+            );
+          }
+        }
+
+        return messageData;
+      })
+    );
+
     chatHistories.push({
       chatId: groupId,
       title: GroupUsername,
-      messages: await Promise.all(
-        result.messages.map(async (msg) => {
-          let photoBase64 = null;
-
-          // Check if message has photo
-          if (msg.media && msg.media.photo) {
-            try {
-              // Download the photo
-              const buffer = await client.downloadMedia(msg.media);
-              // Convert buffer to base64
-              photoBase64 = buffer.toString("base64");
-            } catch (error) {
-              console.error("Error downloading photo:", error);
-            }
-          }
-
-          return {
-            id: msg.id,
-            fromId: msg.fromId?.userId || null,
-            message: msg.message,
-            photo: photoBase64, // Will be null if no photo
-            date: new Date(msg.date * 1000).toLocaleString("en-US", {
-              timeZone: "Asia/Kuala_Lumpur",
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-              hour12: true,
-            }),
-          };
-        })
-      ),
+      messages: messages,
     });
 
-    fs.writeFileSync(
-      "chatHistories.json",
-      JSON.stringify(chatHistories, null, 2),
-      "utf-8"
-    );
+    // Create messageHistory directory if it doesn't exist
+    const messageHistoryDir = path.join(__dirname, "messageHistory");
+    if (!fs.existsSync(messageHistoryDir)) {
+      fs.mkdirSync(messageHistoryDir);
+    }
+
+    // Create filename with group name and current date/time in Malaysia timezone
+    const now = new Date()
+      .toLocaleString("en-US", {
+        timeZone: "Asia/Kuala_Lumpur",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      })
+      .replace(/[/:,\s]/g, "_");
+
+    const filename = `${GroupUsername}_${now}.json`;
+    const filePath = path.join(messageHistoryDir, filename);
+
+    // Write to file
+    fs.writeFileSync(filePath, JSON.stringify(chatHistories, null, 2), "utf-8");
+
+    console.log(`Chat history saved to ${filePath}`);
+    return { filePath: `${GroupUsername}_${now}.json` };
   } catch (error) {
     console.error("Failed to fetch chat histories:", error);
   }
@@ -176,6 +221,47 @@ const beingAddedToNewGroup = async () => {
           groupName: groupName,
           channelId: update.channelId.value,
         });
+
+        const result = await fetchChatHistory(groupName);
+
+        if (result && result.filePath) {
+          // Read and parse the JSON file
+          const messageHistoryDir = path.join(__dirname, "messageHistory");
+          const filePath = path.join(messageHistoryDir, result.filePath);
+
+          try {
+            const fileContent = fs.readFileSync(filePath, "utf-8");
+            const jsonData = JSON.parse(fileContent);
+
+            // Arrays to store different types of messages
+            const textMessages = [];
+            const mediaMessages = [];
+
+            // Process each message
+            jsonData[0].messages.forEach((msg) => {
+              if (msg.media) {
+                // If message has media, add to mediaMessages
+                mediaMessages.push(msg);
+              } else if (msg.message !== null) {
+                // If message has text but no media, add to textMessages
+                textMessages.push(msg);
+              }
+            });
+
+            aiQueryText({
+              question: `based on the following messages that i got from a telegram group chat which is ${
+                jsonData[0].title
+              }, can you identify if the group is a scam or not and why it is a scam group, make sure mention back the group name , your answer don't need to be long and make it in point, because i will use your response to forward it to someone from by using telegram and i use automation, so make it like you chat with someone: ${textMessages
+                .map((data) => data.message)
+                .join(" ")}`,
+            }).then((response) => {
+              console.log(response.text);
+              sendMessageToUser("@goodbye000000", response.text);
+            });
+          } catch (error) {
+            console.error("Error processing JSON file:", error);
+          }
+        }
       }
     });
     console.log("Event handler setup complete");
@@ -206,3 +292,54 @@ const getGroupName = async (groupId) => {
     }
   }
 };
+
+const sendMessageToUser = async (username, message) => {
+  try {
+    // Make sure username starts with @
+    const formattedUsername = username.startsWith("@")
+      ? username
+      : `@${username}`;
+
+    // Get the entity (user) from username
+    const entity = await client.getEntity(formattedUsername);
+
+    if (!entity) {
+      throw new Error(`User ${formattedUsername} not found`);
+    }
+
+    // Send the message
+    const result = await client.sendMessage(entity, {
+      message: message,
+    });
+
+    console.log(`Message sent successfully to ${formattedUsername}`);
+    return {
+      success: true,
+      messageId: result.id,
+      timestamp: new Date().toLocaleString("en-US", {
+        timeZone: "Asia/Kuala_Lumpur",
+      }),
+    };
+  } catch (error) {
+    console.error(`Failed to send message to ${username}:`, error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+async function aiQueryText(data) {
+  const response = await fetch(
+    "http://localhost:3000/api/v1/prediction/722a1f44-d0d1-42ad-b2c6-01f73fa44fb3",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }
+  );
+  const result = await response.json();
+  return result;
+}
