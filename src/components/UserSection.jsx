@@ -42,14 +42,31 @@ const UserSection = () => {
     }
   };
 
-  const handleReportSubmit = () => {
+  const handleReportSubmit = async () => {
     if (groupLink.trim()) {
-      const updatedReports = [...reportedLinks, groupLink];
-      setReportedLinks(updatedReports);
-      setGroupLink("");
+      try {
+        const response = await fetch("http://localhost:3003/api/joinGroup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ inviteLink: groupLink }),
+        });
 
-      console.log("Reported Links:", updatedReports); // Simulating JSON save
-      alert("Report has been sent successfully!");
+        const data = await response.json();
+
+        if (data.success) {
+          const updatedReports = [...reportedLinks, groupLink];
+          setReportedLinks(updatedReports);
+          setGroupLink("");
+          alert("Report has been sent successfully!");
+        } else {
+          alert(`Failed to process report: ${data.error}`);
+        }
+      } catch (error) {
+        console.error("Error submitting report:", error);
+        alert("Failed to submit report. Please try again later.");
+      }
     } else {
       alert("Please enter a valid group link.");
     }
