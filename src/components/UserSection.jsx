@@ -77,7 +77,7 @@ const UserSection = () => {
       {/* Header */}
       <div className="flex items-center justify-between w-full">
         <div>
-          <h1 className="text-2xl font-semibold">Hi, Pak Junaidie 👋</h1>
+          <h1 className="text-2xl font-semibold">Hi, User 👋</h1>
           <p className="text-gray-500 text-sm">Secure your chats</p>
         </div>
         <img
@@ -152,7 +152,7 @@ const UserSection = () => {
           onClick={() => alert("Navigating to article page")}
         >
           <img
-            src="src/assets/davina.jpg"
+            src="src/assets/ai.webp"
             alt="Article"
             className="w-full h-full object-cover"
           />

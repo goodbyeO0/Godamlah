@@ -8,7 +8,6 @@ const BottomNavigator = () => {
     { icon: "👤", label: "User", path: "/" },
     { icon: "🏆", label: "Challenge", path: "/challenge" },
     { icon: "📊", label: "Leaderboard", path: "/leaderboard" },
-    { icon: "📄", label: "Report", path: "/report" },
     { icon: "📈", label: "Analysis", path: "/analysis" },
   ];
 
