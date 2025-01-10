@@ -1,29 +1,59 @@
 import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 import usernamesData from "../data/usernames.json";
 import reportedLinksData from "../data/reportedLinks.json"; // Simulated JSON file for reports
 
 const UserSection = () => {
+  const { user } = useAuth();
   const [username, setUsername] = useState("");
+  const [monitoringStatus, setMonitoringStatus] = useState(false);
   const [buttonState, setButtonState] = useState("generate");
   const [lastGenerated, setLastGenerated] = useState(
     localStorage.getItem("lastGenerated") || null
   );
   const [groupLink, setGroupLink] = useState(""); // Report group link
   const [reportedLinks, setReportedLinks] = useState(reportedLinksData || []); // Reported links data
+  console.log(user);
 
   useEffect(() => {
-    const savedUsername = localStorage.getItem("username");
-    const savedTime = localStorage.getItem("lastGenerated");
+    // Start monitoring for new groups when component mounts
+    const startMonitoring = async () => {
+      try {
+        // Make sure we have a user and their telegram username
+        if (!user || !user.telegramUsername) {
+          console.log("No user or telegram username available");
+          return;
+        }
 
-    if (savedUsername && savedTime) {
-      const now = new Date();
-      const lastTime = new Date(savedTime);
-      if (now - lastTime < 1 * 60 * 1000) {
-        setUsername(savedUsername);
-        setButtonState("generated");
+        console.log("Starting monitoring for:", user.telegramUsername);
+
+        const response = await fetch(
+          "http://localhost:3000/api/startMonitoring",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              telegramUsername: user.telegramUsername.replace("@", ""),
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Monitoring response:", data);
+        setMonitoringStatus(true);
+      } catch (error) {
+        console.error("Error starting monitoring:", error);
       }
-    }
-  }, []);
+    };
+
+    startMonitoring();
+  }, [user]); // Only depend on user changes
 
   const generateUsername = () => {
     const now = new Date();
@@ -45,13 +75,16 @@ const UserSection = () => {
   const handleReportSubmit = async () => {
     if (groupLink.trim()) {
       try {
-        const response = await fetch("http://localhost:3003/api/joinGroup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ inviteLink: groupLink }),
-        });
+        const response = await fetch(
+          "http://localhost:3000/api/joinGroupViaLink",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ inviteLink: groupLink }),
+          }
+        );
 
         const data = await response.json();
 
@@ -77,8 +110,10 @@ const UserSection = () => {
       {/* Header */}
       <div className="flex items-center justify-between w-full">
         <div>
-          <h1 className="text-2xl font-semibold">Hi, User 👋</h1>
-          <p className="text-gray-500 text-sm">Secure your chats</p>
+          <h1 className="text-2xl font-semibold">Hi, {user?.fullName} 👋</h1>
+          <p className="text-gray-500 text-sm">
+            {monitoringStatus ? "Monitoring Active" : "Starting Monitoring..."}
+          </p>
         </div>
         <img
           src="src/assets/davina.jpg"
@@ -143,7 +178,7 @@ const UserSection = () => {
       {/* Recent Activities */}
       <div className="mt-8 w-full">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-lg font-semibold">Recent Activities Status</h2>
+          <h2 className="text-lg font-semibold">Related article</h2>
         </div>
 
         {/* Article Section */}

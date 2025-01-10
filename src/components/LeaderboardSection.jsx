@@ -2,11 +2,11 @@ import React from "react";
 
 const LeaderboardSection = () => {
   const users = [
-    { username: "topuser1", score: 1000, rank: 1 },
-    { username: "topuser2", score: 900, rank: 2 },
-    { username: "topuser3", score: 800, rank: 3 },
-    { username: "user4", score: 700, rank: 4 },
-    { username: "user5", score: 600, rank: 5 },
+    { username: "Jamil", score: 1000, rank: 1 },
+    { username: "Tom", score: 900, rank: 2 },
+    { username: "Kamarul", score: 800, rank: 3 },
+    { username: "Erlina", score: 700, rank: 4 },
+    { username: "Luminous", score: 600, rank: 5 },
   ];
 
   const currentUser = { username: "you", score: 650, rank: 4 };
@@ -41,7 +41,9 @@ const LeaderboardSection = () => {
                 : "bg-gray-200"
             }`}
           >
-            <span>{user.rank}. {user.username}</span>
+            <span>
+              {user.rank}. {user.username}
+            </span>
             <span>{user.score} points</span>
           </div>
         ))}

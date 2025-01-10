@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock } from "react-icons/fi";
+import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
-const LoginSection = ({ setIsLoggedIn }) => {
+const LoginSection = () => {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     emailOrUsername: "",
     password: "",
@@ -15,21 +18,31 @@ const LoginSection = ({ setIsLoggedIn }) => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const savedUser = JSON.parse(localStorage.getItem("userData"));
-    if (
-      savedUser &&
-      (formData.emailOrUsername === savedUser.email ||
-        formData.emailOrUsername === savedUser.telegramUsername) &&
-      formData.password === savedUser.password
-    ) {
-      alert(`Welcome back, ${savedUser.fullName}!`);
-      setIsLoggedIn(true);
-      navigate("/user");
-    } else {
-      alert("Invalid credentials. Please try again.");
+    try {
+      const response = await axios.get("http://localhost:3000/api/users");
+      const users = response.data.users;
+
+      const user = users.find(
+        (u) =>
+          (u.email === formData.emailOrUsername ||
+            u.telegramUsername === formData.emailOrUsername) &&
+          u.password === formData.password
+      );
+
+      if (user) {
+        const { password, ...userWithoutPassword } = user;
+        login(userWithoutPassword);
+        alert(`Welcome back, ${user.fullName}!`);
+        navigate("/user");
+      } else {
+        alert("Invalid credentials. Please try again.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Login failed. Please try again.");
     }
   };
 
@@ -79,6 +92,9 @@ const LoginSection = ({ setIsLoggedIn }) => {
           >
             Sign up
           </span>
+        </p>
+        <p className="text-sm text-center mt-4 text-blue-500">
+          forgot password
         </p>
       </div>
     </div>

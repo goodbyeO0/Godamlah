@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiUser, FiMail, FiLock, FiSend } from "react-icons/fi";
+import axios from "axios";
 
 const RegisterSection = ({ setIsRegistered }) => {
   const [formData, setFormData] = useState({
@@ -18,7 +19,7 @@ const RegisterSection = ({ setIsRegistered }) => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
@@ -26,10 +27,23 @@ const RegisterSection = ({ setIsRegistered }) => {
       return;
     }
 
-    localStorage.setItem("userData", JSON.stringify(formData));
-    setIsRegistered(true);
-    alert("Registration successful! Please log in.");
-    navigate("/login");
+    try {
+      const response = await axios.post("http://localhost:3000/api/register", {
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        telegramUsername: formData.telegramUsername,
+      });
+
+      setIsRegistered(true);
+      alert("Registration successful! Please log in.");
+      navigate("/login");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error || "Registration failed. Please try again.";
+      alert(errorMessage);
+      console.error("Registration error:", error);
+    }
   };
 
   return (

@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import CoverSection from "./components/CoverSection";
 import LoginSection from "./components/LoginSection";
 import RegisterSection from "./components/RegisterSection";
@@ -7,8 +12,8 @@ import UserPage from "./pages/UserPage";
 import ChallengePage from "./pages/ChallengePage";
 import AnalysisSection from "./components/AnalysisSection";
 import LeaderboardSection from "./components/LeaderboardSection";
-import ReportSection from "./components/ReportSection";
 import BottomNavigator from "./components/BottomNavigator";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -32,59 +37,54 @@ function App() {
   }, [isRegistered, isLoggedIn]);
 
   return (
-    <Router>
-      <div className="flex items-center justify-center h-screen bg-gray-200">
-        <div className="w-[375px] md:w-[500px] h-screen bg-white shadow-lg overflow-hidden rounded-lg relative">
-          {isLoading ? (
-            <CoverSection />
-          ) : (
-            <div className="h-full flex flex-col">
-              <div className="flex-1 overflow-y-auto">
-                <Routes>
-                  {/* Register Page (First Page) */}
-                  <Route
-                    path="/"
-                    element={
-                      isRegistered ? (
-                        <Navigate to="/login" replace />
-                      ) : (
+    <AuthProvider>
+      <Router>
+        <div className="flex items-center justify-center h-screen bg-gray-200">
+          <div className="w-[375px] md:w-[500px] h-screen bg-white shadow-lg overflow-hidden rounded-lg relative">
+            {isLoading ? (
+              <CoverSection />
+            ) : (
+              <div className="h-full flex flex-col">
+                <div className="flex-1 overflow-y-auto">
+                  <Routes>
+                    {/* Register Page (First Page) */}
+                    <Route
+                      path="/"
+                      element={
                         <RegisterSection setIsRegistered={setIsRegistered} />
-                      )
-                    }
-                  />
+                      }
+                    />
 
-                  {/* Login Page */}
-                  <Route
-                    path="/login"
-                    element={
-                      isLoggedIn ? (
-                        <Navigate to="/user" replace />
-                      ) : (
-                        <LoginSection setIsLoggedIn={setIsLoggedIn} />
-                      )
-                    }
-                  />
+                    {/* Login Page */}
+                    <Route
+                      path="/login"
+                      element={<LoginSection setIsLoggedIn={setIsLoggedIn} />}
+                    />
 
-                  {/* User Page */}
-                  <Route path="/user" element={<UserPage />} />
+                    {/* User Page */}
+                    <Route path="/user" element={<UserPage />} />
 
-                  {/* Other Pages */}
-                  <Route path="/challenge" element={<ChallengePage />} />
-                  <Route path="/analysis" element={<AnalysisSection />} />
-                  <Route path="/leaderboard" element={<LeaderboardSection />} />
-                  <Route path="/report" element={<ReportSection />} />
-                </Routes>
+                    {/* Other Pages */}
+                    <Route path="/challenge" element={<ChallengePage />} />
+                    <Route path="/analysis" element={<AnalysisSection />} />
+                    <Route
+                      path="/leaderboard"
+                      element={<LeaderboardSection />}
+                    />
+                  </Routes>
+                </div>
+
+                {/* Bottom Navigator (Hidden on Register and Login Pages) */}
+                {!(
+                  window.location.pathname === "/" ||
+                  window.location.pathname === "/login"
+                ) && <BottomNavigator />}
               </div>
-
-              {/* Bottom Navigator (Hidden on Register and Login Pages) */}
-              {!(window.location.pathname === "/" || window.location.pathname === "/login") && (
-                <BottomNavigator />
-              )}
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }
 
